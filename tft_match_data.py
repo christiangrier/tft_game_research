@@ -32,38 +32,38 @@ class TFTDataCollector:
         return match_data
 
     def parse_data(self, match_data, target_puuid: str):
+        data = []
+        for match in match_data:
+            info = match['info']
 
-        info = match_data['info']
+            player_data = None
+            for participant in info['participants']:
+                if participant['puuid'] == target_puuid:
+                    player_data = participant
+                    break
+            
+            if not player_data:
+                raise ValueError(f"Player with PUUID {target_puuid} not found in match")
 
-        player_data = None
-        for participant in info['participants']:
-            if participant['puuid'] == target_puuid:
-                player_data = participant
-                break
-        
-        if not player_data:
-            raise ValueError(f"Player with PUUID {target_puuid} not found in match")
-
-        units = []
-        for unit in player_data.get('units', []):
-            units.append({
-                'character_id': unit['character_id'],
-                'tier': unit['tier'],
-                'items': unit.get('itemNames', []),
-                'rarity': unit['rarity']
-            })
-
-        traits = []
-        for trait in player_data.get('traits', []):
-            if trait['tier_current'] > 0:  # Only active traits
-                traits.append({
-                    'name': trait['name'],
-                    'num_units': trait['num_units'],
-                    'tier': trait['tier_current']
+            units = []
+            for unit in player_data.get('units', []):
+                units.append({
+                    'character_id': unit['character_id'],
+                    'tier': unit['tier'],
+                    'items': unit.get('itemNames', []),
+                    'rarity': unit['rarity']
                 })
-       
-        return {
-            'match_id': match_data['metadata']['match_id'],
+
+            traits = []
+            for trait in player_data.get('traits', []):
+                if trait['tier_current'] > 0:  # Only active traits
+                    traits.append({
+                        'name': trait['name'],
+                        'num_units': trait['num_units'],
+                        'tier': trait['tier_current']
+                    })
+            match_data_each = {
+            'match_id': match_data[0]['metadata']['match_id'],
             'game_datetime': datetime.fromtimestamp(info['game_datetime'] / 1000).isoformat(),
             'game_length': info['game_length'],
             'game_version': info['game_version'],
@@ -79,7 +79,9 @@ class TFTDataCollector:
             'units': units,
             'traits': traits,
             'companion': player_data.get('companion', {})
-        }
+            }
+            data.append(match_data_each)
+        return data
 
 def main(name: str = 'Flancy#1113', platform: str = 'na1'):
 
@@ -88,7 +90,7 @@ def main(name: str = 'Flancy#1113', platform: str = 'na1'):
     player = name.replace('#','')
 
     puuid = collector.get_puuid_by_summoner(name, platform)
-    match_ids = collector.collect_match_ids(puuid, platform)
+    match_ids = collector.collect_match_ids(puuid, platform, 3)
     match_data = collector.collect_match_data(match_ids, platform)
     parsed_data = collector.parse_data(match_data, puuid)
 

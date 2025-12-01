@@ -49,14 +49,16 @@ class TFTAPIClient:
 
     def get_single_match_data(self, match_id: str, platform: str):
         region = self.get_region_routing(platform)
+        filepath = f'tft_data/raw_matches/{match_id}.json'
+        data = []
         url = f"https://{region}.api.riotgames.com/tft/match/v1/matches/{match_id}"
         match_data = self.make_request(url)
         print("Fetching match data...")
-        filepath = f'tft_data/raw_matches/{match_id}.json'
+        data.append(match_data)
         print(f"Saving Match Data to {filepath}")
         with open(filepath, 'w') as f:
-            json.dump(match_data, f, indent=2)
-        return match_data
+            json.dump(data, f, indent=2)
+        return data
 
     def get_multi_match_data(self, match_id: List, platform: str):
         region = self.get_region_routing(platform)
