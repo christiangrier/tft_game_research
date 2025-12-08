@@ -90,7 +90,7 @@ def main(name: str = 'Flancy#1113', platform: str = 'na1'):
     player = name.replace('#','')
 
     puuid = collector.get_puuid_by_summoner(name, platform)
-    match_ids = collector.collect_match_ids(puuid, platform, 3)
+    match_ids = collector.collect_match_ids(puuid, platform, 10)
     match_data = collector.collect_match_data(match_ids, platform)
     parsed_data = collector.parse_data(match_data, puuid)
 
