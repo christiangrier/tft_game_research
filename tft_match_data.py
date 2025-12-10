@@ -49,9 +49,8 @@ class TFTDataCollector:
             for unit in player_data.get('units', []):
                 units.append({
                     'character_id': unit['character_id'],
-                    'tier': unit['tier'],
-                    'items': unit.get('itemNames', []),
-                    'rarity': unit['rarity']
+                    'star_level': unit['tier'],
+                    'items': unit.get('itemNames', [])
                 })
 
             traits = []
@@ -83,21 +82,24 @@ class TFTDataCollector:
             data.append(match_data_each)
         return data
 
-def main(name: str = 'Flancy#1113', platform: str = 'na1'):
+def data_collector_main(name: str = '100T Dishsoap#NA2', platform: str = 'na1'):
 
     collector = TFTDataCollector()
 
     player = name.replace('#','')
 
     puuid = collector.get_puuid_by_summoner(name, platform)
-    match_ids = collector.collect_match_ids(puuid, platform, 10)
+    match_ids = collector.collect_match_ids(puuid, platform, 20)
     match_data = collector.collect_match_data(match_ids, platform)
     parsed_data = collector.parse_data(match_data, puuid)
 
     parsed_file = f"tft_data/parsed_matches/{player}_{match_ids[0]}_{len(match_ids)}.json"
+    print(f"Saving Parsed Match Data to {parsed_file}")
     with open(parsed_file, 'w') as f:
         json.dump(parsed_data, f, indent=2)
 
+    return parsed_data, parsed_file
+
 
 if __name__ == '__main__':
-    main()
+    data_collector_main()
