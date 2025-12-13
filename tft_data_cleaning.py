@@ -1,14 +1,15 @@
 import json
 import sys
+import argparse
 from typing import List, Dict, Optional
 from tft_match_data import data_collector_main
 import pandas as pd
 
 class TFTDataCleaner:
 
-    def __init__(self):
+    def __init__(self, name: str = '100T Dishsoap#NA2', platform: str = 'na1', count: int = 5):
         # self.file = file
-        self.file = data_collector_main()
+        self.file = data_collector_main(name=name, platform=platform, count=count)
         
 
     def set_identifier(self, set_number: int = 16):
@@ -79,9 +80,9 @@ class TFTDataCleaner:
 
         
 
-def main():
+def main(name: str, platform: str, count: int):
     # cleaner = TFTDataCleaner('tft_data/parsed_matches/100T DishsoapNA2_NA1_5432018735_10.json')
-    cleaner = TFTDataCleaner()
+    cleaner = TFTDataCleaner(name=name, platform=platform, count=count)
     set_id = cleaner.set_identifier()
     top_4_matches = cleaner.top_4(set_id[0])
     cleaned_file_json = 'tft_data/cleaned_matches/' + set_id[1] + '.json'
@@ -93,4 +94,13 @@ def main():
     dataframe.to_csv(csv)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='TFT Data Cleaner')
+    parser.add_argument('--name', type=str, default='100T Dishsoap#NA2', 
+                        help='Player name (default: 100T Dishsoap#NA2)')
+    parser.add_argument('--platform', type=str, default='na1',
+                        help='Platform (default: na1)')
+    parser.add_argument('--count', type=int, default=5,
+                        help='(default: count 5)')       
+
+    args = parser.parse_args()
+    main(name=args.name, platform=args.platform, count=args.count)

@@ -1,5 +1,4 @@
 import json
-import sys
 from datetime import datetime
 from typing import List, Dict, Optional
 from dotenv import load_dotenv
@@ -18,7 +17,7 @@ class TFTDataCollector:
         # print(summoner)
         return summoner
 
-    def collect_match_ids(self, puuid: str, platform: str, count: int = 1) -> List[str]:
+    def collect_match_ids(self, puuid: str, platform: str, count: int = 5) -> List[str]:
         match_ids = self.client.get_match_ids(puuid, platform, count)
         # print(match_ids)
         return match_ids
@@ -83,14 +82,14 @@ class TFTDataCollector:
             data.append(match_data_each)
         return data
 
-def data_collector_main(name: str = '100T Dishsoap#NA2', platform: str = 'na1'):
+def data_collector_main(name: str = '100T Dishsoap#NA2', platform: str = 'na1', count: int = 5):
 
     collector = TFTDataCollector()
 
     player = name.replace('#','')
 
     puuid = collector.get_puuid_by_summoner(name, platform)
-    match_ids = collector.collect_match_ids(puuid, platform, 10)
+    match_ids = collector.collect_match_ids(puuid, platform, count)
     match_data = collector.collect_match_data(match_ids, platform)
     parsed_data = collector.parse_data(match_data, puuid)
 
