@@ -3,3 +3,4 @@ tft_data/
 __pycache__/
 venv/
 items.txt
+test/

@@ -63,6 +63,7 @@ class TFTDataCollector:
                     })
             match_data_each = {
             'match_id': match_data[0]['metadata']['match_id'],
+            'riotIdGameName': player_data['riotIdGameName'],
             'game_datetime': datetime.fromtimestamp(info['game_datetime'] / 1000).isoformat(),
             'game_length': info['game_length'],
             'game_version': info['game_version'],
@@ -89,16 +90,18 @@ def data_collector_main(name: str = '100T Dishsoap#NA2', platform: str = 'na1'):
     player = name.replace('#','')
 
     puuid = collector.get_puuid_by_summoner(name, platform)
-    match_ids = collector.collect_match_ids(puuid, platform, 20)
+    match_ids = collector.collect_match_ids(puuid, platform, 10)
     match_data = collector.collect_match_data(match_ids, platform)
     parsed_data = collector.parse_data(match_data, puuid)
 
-    parsed_file = f"tft_data/parsed_matches/{player}_{match_ids[0]}_{len(match_ids)}.json"
+    # parsed_file = f"tft_data/parsed_matches/{player}_{match_ids[0]}_{len(match_ids)}.json"
+    filename = f'{player}_{match_ids[0]}_{len(match_ids)}'
+    parsed_file = 'tft_data/parsed_matches/' + filename + '.json'
     print(f"Saving Parsed Match Data to {parsed_file}")
     with open(parsed_file, 'w') as f:
         json.dump(parsed_data, f, indent=2)
 
-    return parsed_data, parsed_file
+    return parsed_data, filename
 
 
 if __name__ == '__main__':
