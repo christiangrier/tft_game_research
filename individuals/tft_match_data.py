@@ -54,7 +54,7 @@ class TFTDataCollector:
 
             traits = []
             for trait in player_data.get('traits', []):
-                if trait['tier_current'] > 0:  # Only active traits
+                if trait['tier_current'] > 0:
                     traits.append({
                         'name': trait['name'],
                         'num_units': trait['num_units'],

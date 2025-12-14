@@ -63,7 +63,6 @@ class TFTAPIClient:
     def get_multi_match_data(self, match_id: List, platform: str):
         region = self.get_region_routing(platform)
         filepath = f'tft_data/raw_matches/{match_id[0]}_{match_id[-1]}_{len(match_id)}.json'
-        # filepath = f'tft_data/raw_matches/{len(match_id)}.json'
         data = []
         for match in match_id:
             url = f"https://{region}.api.riotgames.com/tft/match/v1/matches/{match}"

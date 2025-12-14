@@ -1,6 +1,7 @@
 import json
 import sys
 import argparse
+from datetime import datetime
 from typing import List, Dict, Optional
 from tft_match_data import data_collector_main
 import pandas as pd
@@ -13,8 +14,6 @@ class TFTDataCleaner:
         
 
     def set_identifier(self, set_number: int = 16):
-        # with open(self.file, 'r') as f:
-        #     file = json.load(f)
         data = []
         for match in self.file[0]:
             if match['tft_set_number'] != set_number:
@@ -22,11 +21,20 @@ class TFTDataCleaner:
             else:
                 data.append(match)
         set_corrected = self.file
-        # with open(set_corrected, 'w') as f:
-        #     json.dump(data, f, indent=2)
         filename = self.file[1]
         
         return data, filename
+
+    def set_time_check(self, match_data: List):
+        data = []
+        current_set_release = datetime(2025, 12, 9, 8, 15, 0)
+        for match in match_data:
+            match_datetime = datetime.fromisoformat(match['game_datetime'])
+            if match_datetime < current_set_release:
+                del match
+            else:
+                data.append(match)
+        return data
 
     def top_4(self, match_data: List):
         data = []
@@ -49,18 +57,15 @@ class TFTDataCleaner:
                 'placement': record['placement']
             }
             
-            # Add units (up to 10 units with 3 items each)
             for i, unit in enumerate(record['units'], 1):
                 row[f'unit_{i}_character_id'] = unit['character_id']
                 row[f'unit_{i}_star_level'] = unit['star_level']
                 
-                # Add items for this unit
                 items = unit['items']
                 row[f'unit_{i}_item_1'] = items[0] if len(items) > 0 else None
                 row[f'unit_{i}_item_2'] = items[1] if len(items) > 1 else None
                 row[f'unit_{i}_item_3'] = items[2] if len(items) > 2 else None
             
-            # Add traits
             for i, trait in enumerate(record['traits'], 1):
                 row[f'trait_{i}_name'] = trait['name']
                 row[f'trait_{i}_num_units'] = trait['num_units']
@@ -70,21 +75,13 @@ class TFTDataCleaner:
 
         df = pd.DataFrame(rows)
         return df
-
-    def placement(self, match_data: List):
-        data = []
-        for match in match_data:
-            placement = match["placement"]
-            data.append(placement)
-        return data
-
         
 
 def main(name: str, platform: str, count: int):
-    # cleaner = TFTDataCleaner('tft_data/parsed_matches/100T DishsoapNA2_NA1_5432018735_10.json')
     cleaner = TFTDataCleaner(name=name, platform=platform, count=count)
     set_id = cleaner.set_identifier()
-    top_4_matches = cleaner.top_4(set_id[0])
+    set_time = cleaner.set_time_check(set_id[0])
+    top_4_matches = cleaner.top_4(set_time)
     cleaned_file_json = 'tft_data/cleaned_matches/' + set_id[1] + '.json'
     print(f"Saving Cleaned Match Data to {cleaned_file_json}")
     with open(cleaned_file_json, 'w') as f:
