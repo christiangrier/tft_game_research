@@ -6,7 +6,7 @@ from tft_leagues_api_client import TFTAPIClient
 class TFTDataCollector:
 
     def __init__(self, platform: str):
-        self.client = TFTAPIClient()
+        self.client = TFTAPIClient(rate_limit_buffer=0.9)
         self.platform = platform
 
     def get_puuids(self):
@@ -68,15 +68,15 @@ class TFTDataCollector:
         return data
 
 def data_collector_main(platform: str = 'na1', count: int = 1):
-
     collector = TFTDataCollector(platform)
     puuid = collector.get_puuids()
-    match_ids = collector.collect_match_ids(puuid[:10], count)
+    match_ids = collector.collect_match_ids(puuid[:9], count)
+    # match_ids = collector.collect_match_ids(puuid, count)
     match_data = collector.collect_match_data(match_ids)
-    print(match_data)
+    # print(match_data)
     parsed_data = collector.parse_data(match_data)
     filename = f'{match_ids[0]}_{match_ids[-1]}_{len(parsed_data)}'
-    parsed_file = 'test/tft_data/parsed_matches/' + filename + '.json'
+    parsed_file = 'tft_data/parsed_matches/' + filename + '.json'
     print(f"Saving Parsed Match Data to {parsed_file}")
     with open(parsed_file, 'w') as f:
         json.dump(parsed_data, f, indent=2)

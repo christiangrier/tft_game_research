@@ -2,7 +2,7 @@ import json
 import argparse
 from datetime import datetime
 from typing import List, Dict, Optional
-from tft_leagues_data_cleaning import data_collector_main
+from tft_leagues_match_data import data_collector_main
 import pandas as pd
 
 class TFTDataCleaner:
@@ -21,6 +21,7 @@ class TFTDataCleaner:
         filename = self.file[1]
         return data, filename
 
+
     def set_time_check(self, match_data: List):
         data = []
         current_set_release = datetime(2025, 12, 9, 8, 15, 0)
@@ -31,6 +32,7 @@ class TFTDataCleaner:
             else:
                 data.append(match)
         return data
+
 
     def top_4(self, match_data: List):
         data = []
@@ -43,8 +45,8 @@ class TFTDataCleaner:
 
         return data
 
-    def dataframe_prep(self, match_data):
 
+    def dataframe_prep(self, match_data):
         rows = []
         for record in match_data:
             row = {
@@ -76,16 +78,17 @@ class TFTDataCleaner:
 def main(platform: str, count: int):
     cleaner = TFTDataCleaner(platform=platform, count=count)
     set_id = cleaner.set_identifier()
-    print(set_id[0])
+    # print(set_id[0])
     set_time = cleaner.set_time_check(set_id[0])
     top_4_matches = cleaner.top_4(set_time)
-    cleaned_file_json = 'test/tft_data/cleaned_matches/' + set_id[1] + '.json'
+    cleaned_file_json = 'tft_data/cleaned_matches/' + set_id[1] + '.json'
     print(f"Saving Cleaned Match Data to {cleaned_file_json}")
     with open(cleaned_file_json, 'w') as f:
         json.dump(top_4_matches, f, indent=2)
     dataframe = cleaner.dataframe_prep(top_4_matches)
-    csv = 'test/tft_data/cleaned_csv/' + set_id[1] + '.csv'
+    csv = 'tft_data/cleaned_csv/' + set_id[1] + '.csv'
     dataframe.to_csv(csv)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TFT Data Cleaner')
