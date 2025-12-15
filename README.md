@@ -7,6 +7,7 @@ A Python client for collecting Team Fight Tactics match data from the Riot Games
 - ✅ Complete TFT API wrapper
 - ✅ Match history and detailed match data retrieval
 - ✅ Automatic data parsing and storage
+- ✅ Handing of rate limiting for maximum output 
 
 ## API Endpoints Used
 
@@ -16,8 +17,10 @@ A Python client for collecting Team Fight Tactics match data from the Riot Games
 | `/tft/summoner/v1/summoners/by-puuid/{puuid}` | Get summoner data |
 | `/tft/match/v1/matches/by-puuid/{puuid}/ids` | Get match history |
 | `/tft/match/v1/matches/{matchId}` | Get match details |
+| `//tft/league/v1/challenger` | Get challengers players PUUID |
+| `/tft/league/v1/grandmaster` | Get grandmasters players PUUID |
 
-## Rate Limiting - Need to implement
+## Rate Limiting 
 
 - Development API Key: 20 requests per second, 100 requests per 2 minutes
 - The client implements automatic rate limiting with a default 1.2s delay between requests
