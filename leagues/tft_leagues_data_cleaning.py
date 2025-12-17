@@ -24,7 +24,8 @@ class TFTDataCleaner:
 
     def set_time_check(self, match_data: List):
         data = []
-        current_set_release = datetime(2025, 12, 9, 8, 15, 0)
+        # current_set_release = datetime(2025, 12, 9, 8, 15, 0) # patch 16.1b
+        current_set_release = datetime(2025, 12, 16, 11, 30, 0) # patch 16.1c
         for match in match_data:
             match_datetime = datetime.fromisoformat(match['game_datetime'])
             if match_datetime < current_set_release:
