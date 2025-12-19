@@ -8,8 +8,11 @@ import time
 from collections import deque
 
 class RateLimiter:
-    
+    """Limits the number of requests to TFT API to avoid call limits"""
     def __init__(self, max_requests_per_second: int = 20, max_requests_per_two_minutes: int = 100):
+        """
+        Initialize rate limiter 
+        """
         self.max_per_second = max_requests_per_second
         self.max_per_two_minutes = max_requests_per_two_minutes
         
@@ -18,6 +21,7 @@ class RateLimiter:
     
 
     def wait_if_needed(self):
+        """Creates a wait period whenever the max api rate is reached to avoid data errors"""
         current_time = time.time()
         
         self._clean_old_requests(current_time)
@@ -45,6 +49,7 @@ class RateLimiter:
 
     
     def _clean_old_requests(self, current_time: float):
+        """Removes requests that fall outside of tracking window"""
         while self.requests_last_second and current_time - self.requests_last_second[0] > 1.0:
             self.requests_last_second.popleft()
         
@@ -62,6 +67,12 @@ class TFTAPIClient:
     }
 
     def __init__(self, rate_limit_buffer: float = 0.9):
+        """
+        Initialize TFT API client
+        
+        Args:
+            rate_limit_buffer: Multiplier for rate limits 
+        """
         load_dotenv()
         self.api_key = os.getenv('RIOT_API_KEY')
 
@@ -71,6 +82,7 @@ class TFTAPIClient:
 
 
     def make_request(self, url: str) -> Dict:
+        """Logic for rate limited api requests"""
         self.rate_limiter.wait_if_needed()
         headers = {
             "X-Riot-Token": self.api_key
@@ -96,6 +108,7 @@ class TFTAPIClient:
 
 
     def get_region_routing(self, platform: str) -> str:
+        """Finds the region for any given valid platform"""
         for region, platforms in self.Regions.items():
             if platform.lower() in platforms:
                 return region
@@ -103,6 +116,7 @@ class TFTAPIClient:
 
 
     def get_challenger_league(self, platform: str):
+        """Retrieves challenger players platform id for downstream processing"""
         url = f'https://{platform}.api.riotgames.com/tft/league/v1/challenger?queue=RANKED_TFT'
         challengers = self.make_request(url)
         challenger_puuids = [entry['puuid'] for entry in challengers['entries']]
@@ -110,6 +124,7 @@ class TFTAPIClient:
 
 
     def get_gm_league(self, platform: str):
+        """Retrieves grandmaster players platform id for downstream processing"""
         url = f'https://{platform}.api.riotgames.com/tft/league/v1/grandmaster?queue=RANKED_TFT'
         gms = self.make_request(url)
         gm_puuids = []
@@ -118,6 +133,18 @@ class TFTAPIClient:
 
 
     def get_match_ids(self, puuids: List[str], platform: str, count: int = 1, start: int = 0) -> List[str]:
+        """
+        Get match IDs for multiple players.
+        
+        Args:
+            puuids: List of player PUUIDs
+            platform: Platform identifier (e.g., 'na1')
+            count: Number of matches per player
+            start: Starting index for match history
+            
+        Returns:
+            List of unique match IDs
+        """
         region = self.get_region_routing(platform)
         match_ids = set()
         total_players = len(puuids)
@@ -140,6 +167,16 @@ class TFTAPIClient:
 
 
     def get_multi_match_data(self, match_ids: List, platform: str):
+        """
+        Get detailed match data for multiple matches.
+        
+        Args:
+            match_ids: List of match IDs
+            platform: Platform identifier
+            
+        Returns:
+            List of match data dictionaries
+        """
         region = self.get_region_routing(platform)
         filepath = f'tft_data/raw_matches/{match_ids[0]}_{match_ids[-1]}_{len(match_ids)}.json'
         os.makedirs(os.path.dirname(filepath), exist_ok=True)

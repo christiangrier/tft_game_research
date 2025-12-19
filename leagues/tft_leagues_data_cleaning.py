@@ -8,10 +8,12 @@ import pandas as pd
 class TFTDataCleaner:
 
     def __init__(self, platform: str = 'na1', count: int = 5):
+        """Initialize Data Cleaner"""
         self.file = data_collector_main(platform=platform, count=count)
         
 
     def set_identifier(self, set_number: int = 16):
+        """Check for proper set number excludes any for fun gamemodes"""
         data = []
         for match in self.file[0]:
             if match['tft_set_number'] != set_number:
@@ -23,6 +25,7 @@ class TFTDataCleaner:
 
 
     def set_time_check(self, match_data: List):
+        """Creates boundary for current patch time/date"""
         data = []
         # current_set_release = datetime(2025, 12, 9, 8, 15, 0) # patch 16.1b
         current_set_release = datetime(2025, 12, 16, 11, 30, 0) # patch 16.1c
@@ -48,6 +51,7 @@ class TFTDataCleaner:
 
 
     def dataframe_prep(self, match_data):
+        """Prepares the list data to be turned in a dataframe for future analysis"""
         rows = []
         for record in match_data:
             row = {
@@ -81,12 +85,13 @@ def main(platform: str, count: int):
     set_id = cleaner.set_identifier()
     # print(set_id[0])
     set_time = cleaner.set_time_check(set_id[0])
-    top_4_matches = cleaner.top_4(set_time)
-    cleaned_file_json = 'tft_data/cleaned_matches/' + set_id[1] + '.json'
-    print(f"Saving Cleaned Match Data to {cleaned_file_json}")
-    with open(cleaned_file_json, 'w') as f:
-        json.dump(top_4_matches, f, indent=2)
-    dataframe = cleaner.dataframe_prep(top_4_matches)
+    # top_4_matches = cleaner.top_4(set_time)
+    # cleaned_file_json = 'tft_data/cleaned_matches/' + set_id[1] + '.json'
+    # print(f"Saving Cleaned Match Data to {cleaned_file_json}")
+    # with open(cleaned_file_json, 'w') as f:
+    #     json.dump(top_4_matches, f, indent=2)
+    # dataframe = cleaner.dataframe_prep(top_4_matches)
+    dataframe = cleaner.dataframe_prep(set_time)
     csv = 'tft_data/cleaned_csv/' + set_id[1] + '.csv'
     dataframe.to_csv(csv)
 

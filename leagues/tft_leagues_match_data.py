@@ -6,11 +6,12 @@ from tft_leagues_api_client import TFTAPIClient
 class TFTDataCollector:
 
     def __init__(self, platform: str):
+        """Initialize Data Collector"""
         self.client = TFTAPIClient(rate_limit_buffer=0.9)
         self.platform = platform
 
     def get_puuids(self):
-        summoner = self.client.get_gm_league(self.platform)
+        summoner = self.client.get_challenger_league(self.platform)
         return summoner
 
     def collect_match_ids(self, puuid: str, count: int = 5) -> List[str]:
@@ -22,6 +23,15 @@ class TFTDataCollector:
         return match_data
 
     def parse_data(self, match_data):
+        """
+        Parses match data to exclude non needed information from TFT API call
+
+        Args:
+            match_data: List of match data dictionaries
+
+        Returns:
+            data: List of parsed match data dictionaries 
+        """
         data = []
         for match in match_data:
             info = match['info']
@@ -68,18 +78,19 @@ class TFTDataCollector:
         return data
 
 def data_collector_main(platform: str = 'na1', count: int = 1):
+    """Main collector"""
     collector = TFTDataCollector(platform)
     puuid = collector.get_puuids()
-    match_ids = collector.collect_match_ids(puuid[:9], count)
-    # match_ids = collector.collect_match_ids(puuid, count)
+    # match_ids = collector.collect_match_ids(puuid[:9], count) # gm league
+    match_ids = collector.collect_match_ids(puuid, count) # challenger league
     match_data = collector.collect_match_data(match_ids)
     # print(match_data)
     parsed_data = collector.parse_data(match_data)
     filename = f'{match_ids[0]}_{match_ids[-1]}_{len(parsed_data)}'
-    parsed_file = 'tft_data/parsed_matches/' + filename + '.json'
-    print(f"Saving Parsed Match Data to {parsed_file}")
-    with open(parsed_file, 'w') as f:
-        json.dump(parsed_data, f, indent=2)
+    # parsed_file = 'tft_data/parsed_matches/' + filename + '.json'
+    # print(f"Saving Parsed Match Data to {parsed_file}")
+    # with open(parsed_file, 'w') as f:
+    #     json.dump(parsed_data, f, indent=2)
     return parsed_data, filename
 
 
